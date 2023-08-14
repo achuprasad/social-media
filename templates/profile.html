@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ profile.user.username }}'s Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background-color: #336699;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .profile {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile img {
+            max-width: 17%;
+            border-radius: 50%;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .follow-buttons a {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #336699;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .posts ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .posts li {
+            background-color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ profile.user.username }}'s Profile</h1>
+    </header>
+
+    <div class="container">
+        <div class="profile">
+            <div class="user-info">
+                <div>
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture">
+                    {% endif %}
+                    <p>{{ profile.user.username }}</p>
+                </div>
+                <div class="follow-buttons">
+                    {% if request.user != profile.user %}
+                        {% if request.user not in profile.user.followers.all %}
+                            <a href="{% url 'follow' profile.user.username %}">Follow</a>
+                        {% else %}
+                            <a href="{% url 'unfollow' profile.user.username %}">Unfollow</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if profile.bio %}
+                <p>Bio: {{ profile.bio }}</p>
+            {% else %}
+                <p>No bio available.</p>
+            {% endif %}
+
+            <p>Followers: {{ followers_count }}</p>
+            <p>Followed Users: {{ followed_users_count }}</p>
+
+            <h2>Posts</h2>
+            <div class="posts">
+                <ul>
+                    {% for post in user_posts %}
+                        <li>{{ post.content }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            {% if request.user == profile.user %}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ edit_profile_form.as_p }}
+
+                    <button type="submit">Update Profile</button>
+                </form>
+
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
